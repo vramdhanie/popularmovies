@@ -18,18 +18,18 @@ import java.util.List;
 public class ImageAdapter extends BaseAdapter {
 
     private final String LOG_TAG = ImageAdapter.class.getSimpleName();
-    private final  String BASE_URL = "http://image.tmdb.org/t/p/";
-    private final String IMAGE_SIZE = "w185";
+    public static final  String BASE_URL = "http://image.tmdb.org/t/p/";
+    public static final String IMAGE_SIZE = "w185";
 
 
     private Context mContext;
-    private List<String> posters;
+    private List<Movie> posters;
 
     public ImageAdapter(Context c) {
         mContext = c;
     }
 
-    public ImageAdapter(Context c, List<String> posters){
+    public ImageAdapter(Context c, List<Movie> posters){
         this(c);
         this.posters = posters;
 
@@ -40,18 +40,18 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     public Object getItem(int position) {
-        return null;
+        return posters.get(position);
     }
 
     public long getItemId(int position) {
-        return 0;
+        return posters.get(position).id;
     }
 
     public void clear(){
-        posters = new ArrayList<String>();
+        posters = new ArrayList<Movie>();
     }
 
-    public void addAll(List<String> uris){
+    public void addAll(List<Movie> uris){
         posters = uris;
     }
 
@@ -69,7 +69,7 @@ public class ImageAdapter extends BaseAdapter {
             imageView = (ImageView) convertView;
         }
         Log.d(LOG_TAG, "About to load the image");
-        Picasso.with(mContext).load(String.format("%s/%s/%s",BASE_URL, IMAGE_SIZE, posters.get(position))).into(imageView);
+        Picasso.with(mContext).load(String.format("%s/%s/%s",BASE_URL, IMAGE_SIZE, posters.get(position).poster)).into(imageView);
         return imageView;
     }
 

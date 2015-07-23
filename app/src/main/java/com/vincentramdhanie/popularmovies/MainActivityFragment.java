@@ -1,14 +1,23 @@
 package com.vincentramdhanie.popularmovies;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,7 +31,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -34,12 +46,29 @@ public class MainActivityFragment extends Fragment {
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     ImageAdapter adapter;
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        //loadMovies();
+    }
+
     public MainActivityFragment() {
+    }
+
+    /**
+     * Called when the fragment is no longer in use.  This is called
+     * after {@link #onStop()} and before {@link #onDetach()}.
+     */
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(myBroadcastReceiver);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(myBroadcastReceiver, new IntentFilter("com.vincentramdhanie.sortChanged"));
 
     }
 
@@ -49,37 +78,85 @@ public class MainActivityFragment extends Fragment {
         View rootView =  inflater.inflate(R.layout.fragment_main, container, false);
         GridView gridview = (GridView) rootView.findViewById(R.id.posters);
         adapter = new ImageAdapter(getActivity());
-        List<String> imgs = new ArrayList<String>();
         gridview.setAdapter(adapter);
-        new FetchMovies().execute("popularity.desc");
+
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+                Toast.makeText(getActivity(), "" + ((Movie)parent.getAdapter().getItem(position)).title,
+                        Toast.LENGTH_SHORT).show();
+                Movie item = (Movie)parent.getAdapter().getItem(position);
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                intent.putExtra("movie", item);
+                startActivity(intent);
+            }
+        });
+
+
+        loadMovies();
+
+
         return rootView;
     }
 
-    private List<String> getMoviesDataFromJson(String movieJson)
-            throws JSONException {
+    protected BroadcastReceiver myBroadcastReceiver =
+            new BroadcastReceiver() {
+
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    loadMovies();
+                }
+            };
+
+
+    private void loadMovies(){
+        Log.d(LOG_TAG, "About to start loading movies");
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String sort_by = sharedPref.getString(SettingsActivity.KEY_PREF_SORT_BY, "popularity.desc");
+
+        new FetchMovies().execute(sort_by);
+    }
+
+    private List<Movie> getMoviesDataFromJson(String movieJson)
+            throws JSONException, ParseException {
         final String IMAGE_URL = "poster_path";
         final String IMAGE_ID = "id";
         final String IMAGE_TITLE = "original_title";
         final String IMAGE_LIST = "results";
+        final String IMAGE_DESCRIPTION = "overview";
+        final String IMAGE_RELEASE_DATE = "release_date";
+        final String IMAGE_VOTE_AVERAGE = "vote_average";
+
 
         JSONObject mJson = new JSONObject(movieJson);
         JSONArray mArray = mJson.getJSONArray(IMAGE_LIST);
-        List<String> results = new ArrayList<String>();
+        List<Movie> results = new ArrayList<>();
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd");
 
 
         for(int i = 0; i < mArray.length(); i++){
             JSONObject movie = mArray.getJSONObject(i);
-            results.add(movie.getString(IMAGE_URL));
+            Calendar rDate = Calendar.getInstance();
+            Log.d(LOG_TAG, movie.getString(IMAGE_RELEASE_DATE));
+            if(!movie.getString(IMAGE_RELEASE_DATE).equals("null")) {
+                rDate.setTime(format.parse(movie.getString(IMAGE_RELEASE_DATE)));
+            }else{
+                rDate = null;
+            }
+            results.add(new Movie(movie.getLong(IMAGE_ID), movie.getString(IMAGE_TITLE),
+                            movie.getString(IMAGE_URL), movie.getString(IMAGE_DESCRIPTION),
+                            movie.getDouble(IMAGE_VOTE_AVERAGE), rDate));
         }
 
         return results;
     }
 
-    class FetchMovies extends AsyncTask<String, Void, List<String>> {
+    class FetchMovies extends AsyncTask<String, Void, List<Movie>> {
         private final String LOG_TAG = FetchMovies.class.getSimpleName();
 
         @Override
-        protected List<String> doInBackground(String... params) {
+        protected List<Movie> doInBackground(String... params) {
             if(params.length < 1){
                 Log.e(LOG_TAG, "No parameters passed to FetchMovies");
                 return null;
@@ -89,7 +166,7 @@ public class MainActivityFragment extends Fragment {
             final String MOVIE_BASE_URL = "http://api.themoviedb.org/3/discover/movie";
             final String SORT_PARAM= "sort_by";
             final String KEY_PARAM = "api_key";
-            final String api_key = "";
+            final String api_key = "???";
 
 
 
@@ -102,7 +179,7 @@ public class MainActivityFragment extends Fragment {
             BufferedReader reader = null;
 
             String movieJson = null;
-            List<String> imgs = null;
+            List<Movie> imgs = null;
             try{
                 URL url = new URL(apiUrl.toString());
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -133,6 +210,8 @@ public class MainActivityFragment extends Fragment {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
             } finally{
 
             }
@@ -140,7 +219,7 @@ public class MainActivityFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List<String> uris) {
+        protected void onPostExecute(List<Movie> uris) {
             super.onPostExecute(uris);
             if(uris != null) {
                 adapter.clear();
