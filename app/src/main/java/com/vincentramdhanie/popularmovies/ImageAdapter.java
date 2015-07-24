@@ -2,7 +2,6 @@ package com.vincentramdhanie.popularmovies;
 
 import android.content.Context;
 import android.os.Parcelable;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -72,7 +71,7 @@ public class ImageAdapter extends BaseAdapter {
         } else {
             imageView = (ImageView) convertView;
         }
-        Log.d(LOG_TAG, "About to load the image");
+        //Log.d(LOG_TAG, "About to load the image");
         Picasso.with(mContext).load(String.format("%s/%s/%s", BASE_URL, IMAGE_SIZE, ((Movie)posters.get(position)).poster)).into(imageView);
         return imageView;
     }

@@ -85,6 +85,8 @@ public class MainActivityFragment extends Fragment {
                 adapter = new ImageAdapter(getActivity());
             }
             adapter.addAll(savedInstanceState.getParcelableArrayList(MOVIE_LIST));
+        }else{
+            loadMovies();
         }
     }
 
@@ -111,7 +113,7 @@ public class MainActivityFragment extends Fragment {
         });
 
 
-        loadMovies();
+        //loadMovies();
 
 
         return rootView;
