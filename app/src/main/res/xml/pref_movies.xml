@@ -4,7 +4,7 @@
     <ListPreference
         android:key="movie_list"
         android:title="@string/pref_header_movies"
-        android:defaultValue="1"
+        android:defaultValue="popularity.desc"
         android:entries="@array/pref_movies_sort_options"
         android:entryValues="@array/pref_movies_sort_values"
         android:negativeButtonText="@null"

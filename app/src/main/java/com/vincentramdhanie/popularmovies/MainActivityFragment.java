@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -35,7 +36,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 
 /**
@@ -44,12 +44,22 @@ import java.util.List;
  */
 public class MainActivityFragment extends Fragment {
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
+    private final String MOVIE_LIST = "movies";
     ImageAdapter adapter;
 
     @Override
     public void onResume() {
         super.onResume();
         //loadMovies();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save the user's current game state
+        savedInstanceState.putParcelableArrayList(MOVIE_LIST, adapter.getItemList());
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     public MainActivityFragment() {
@@ -69,7 +79,13 @@ public class MainActivityFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(myBroadcastReceiver, new IntentFilter("com.vincentramdhanie.sortChanged"));
-
+        // Check whether we're recreating a previously destroyed instance
+        if (savedInstanceState != null) {
+            if(adapter == null) {
+                adapter = new ImageAdapter(getActivity());
+            }
+            adapter.addAll(savedInstanceState.getParcelableArrayList(MOVIE_LIST));
+        }
     }
 
     @Override
@@ -77,7 +93,9 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView =  inflater.inflate(R.layout.fragment_main, container, false);
         GridView gridview = (GridView) rootView.findViewById(R.id.posters);
-        adapter = new ImageAdapter(getActivity());
+        if(adapter == null) {
+            adapter = new ImageAdapter(getActivity());
+        }
         gridview.setAdapter(adapter);
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -117,7 +135,7 @@ public class MainActivityFragment extends Fragment {
         new FetchMovies().execute(sort_by);
     }
 
-    private List<Movie> getMoviesDataFromJson(String movieJson)
+    private ArrayList<Parcelable> getMoviesDataFromJson(String movieJson)
             throws JSONException, ParseException {
         final String IMAGE_URL = "poster_path";
         final String IMAGE_ID = "id";
@@ -130,7 +148,7 @@ public class MainActivityFragment extends Fragment {
 
         JSONObject mJson = new JSONObject(movieJson);
         JSONArray mArray = mJson.getJSONArray(IMAGE_LIST);
-        List<Movie> results = new ArrayList<>();
+        ArrayList<Parcelable> results = new ArrayList<>();
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd");
 
@@ -152,11 +170,11 @@ public class MainActivityFragment extends Fragment {
         return results;
     }
 
-    class FetchMovies extends AsyncTask<String, Void, List<Movie>> {
+    class FetchMovies extends AsyncTask<String, Void, ArrayList<Parcelable>> {
         private final String LOG_TAG = FetchMovies.class.getSimpleName();
 
         @Override
-        protected List<Movie> doInBackground(String... params) {
+        protected ArrayList<Parcelable> doInBackground(String... params) {
             if(params.length < 1){
                 Log.e(LOG_TAG, "No parameters passed to FetchMovies");
                 return null;
@@ -179,7 +197,7 @@ public class MainActivityFragment extends Fragment {
             BufferedReader reader = null;
 
             String movieJson = null;
-            List<Movie> imgs = null;
+            ArrayList<Parcelable> imgs = null;
             try{
                 URL url = new URL(apiUrl.toString());
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -219,7 +237,7 @@ public class MainActivityFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List<Movie> uris) {
+        protected void onPostExecute(ArrayList<Parcelable> uris) {
             super.onPostExecute(uris);
             if(uris != null) {
                 adapter.clear();

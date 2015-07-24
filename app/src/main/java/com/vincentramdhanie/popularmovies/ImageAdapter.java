@@ -1,6 +1,7 @@
 package com.vincentramdhanie.popularmovies;
 
 import android.content.Context;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +11,6 @@ import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Vincent Ramdhanie on 7/11/15.
@@ -23,16 +23,20 @@ public class ImageAdapter extends BaseAdapter {
 
 
     private Context mContext;
-    private List<Movie> posters;
+    private ArrayList<Parcelable> posters;
 
     public ImageAdapter(Context c) {
         mContext = c;
     }
 
-    public ImageAdapter(Context c, List<Movie> posters){
+    public ImageAdapter(Context c, ArrayList<Parcelable> posters){
         this(c);
         this.posters = posters;
 
+    }
+
+    public ArrayList<Parcelable> getItemList(){
+        return posters;
     }
 
     public int getCount() {
@@ -44,14 +48,14 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     public long getItemId(int position) {
-        return posters.get(position).id;
+        return ((Movie)posters.get(position)).id;
     }
 
     public void clear(){
-        posters = new ArrayList<Movie>();
+        posters = new ArrayList<Parcelable>();
     }
 
-    public void addAll(List<Movie> uris){
+    public void addAll(ArrayList<Parcelable> uris){
         posters = uris;
     }
 
@@ -69,7 +73,7 @@ public class ImageAdapter extends BaseAdapter {
             imageView = (ImageView) convertView;
         }
         Log.d(LOG_TAG, "About to load the image");
-        Picasso.with(mContext).load(String.format("%s/%s/%s",BASE_URL, IMAGE_SIZE, posters.get(position).poster)).into(imageView);
+        Picasso.with(mContext).load(String.format("%s/%s/%s", BASE_URL, IMAGE_SIZE, ((Movie)posters.get(position)).poster)).into(imageView);
         return imageView;
     }
 

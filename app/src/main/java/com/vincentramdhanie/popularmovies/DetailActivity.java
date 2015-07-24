@@ -33,6 +33,12 @@ public class DetailActivity extends ActionBarActivity {
             return true;
         }
 
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 }

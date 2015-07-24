@@ -5,16 +5,5 @@
         android:fragment="com.vincentramdhanie.popularmovies.SettingsActivity$MoviePreferenceFragment"
         android:title="@string/pref_header_movies" />
 
-    <header
-        android:fragment="com.vincentramdhanie.popularmovies.SettingsActivity$GeneralPreferenceFragment"
-        android:title="@string/pref_header_general" />
-
-    <header
-        android:fragment="com.vincentramdhanie.popularmovies.SettingsActivity$NotificationPreferenceFragment"
-        android:title="@string/pref_header_notifications" />
-
-    <header
-        android:fragment="com.vincentramdhanie.popularmovies.SettingsActivity$DataSyncPreferenceFragment"
-        android:title="@string/pref_header_data_sync" />
 
 </preference-headers>
