@@ -24,7 +24,8 @@
         android:layout_below="@+id/movieTitle"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -33,8 +34,8 @@
         android:text="Medium Text"
         android:id="@+id/myear"
         android:layout_alignTop="@+id/mposter"
-        android:layout_alignParentRight="false"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="false" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -43,10 +44,20 @@
         android:text="Medium Text"
         android:id="@+id/mrating"
         android:layout_below="@+id/myear"
-        android:layout_alignLeft="@+id/myear"
-        android:layout_alignStart="@+id/myear"
+        android:layout_alignRight="@+id/myear"
         android:layout_marginTop="24dp" />
 
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/favourite"
+        android:textOff="@string/favourite_off"
+        android:textOn="@string/favourite_on"
+        android:id="@+id/mfavourite"
+        android:layout_below="@+id/mrating"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:showText="true"/>
 
 
     <ScrollView
@@ -60,7 +71,10 @@
         android:layout_alignParentStart="true"
         android:layout_marginTop="24dp" >
 
+
+
         <TextView
+
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="New Text"
@@ -68,4 +82,6 @@
             />
 
     </ScrollView>
+
+
 </RelativeLayout>

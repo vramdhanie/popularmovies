@@ -186,7 +186,7 @@ public class MainActivityFragment extends Fragment {
             final String MOVIE_BASE_URL = "http://api.themoviedb.org/3/discover/movie";
             final String SORT_PARAM= "sort_by";
             final String KEY_PARAM = "api_key";
-            final String api_key = "???";
+            final String api_key = "";
 
 
 
